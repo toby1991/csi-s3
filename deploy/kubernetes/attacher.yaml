@@ -78,13 +78,13 @@ spec:
             - "--csi-address=$(ADDRESS)"
           env:
             - name: ADDRESS
-              value: /var/lib/kubelet/plugins/ch.ctrox.csi.s3-driver/csi.sock
+              value: /var/lib/kubelet/plugins/toby1991.csi.s3-driver/csi.sock
           imagePullPolicy: "IfNotPresent"
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/kubelet/plugins/ch.ctrox.csi.s3-driver
+              mountPath: /var/lib/kubelet/plugins/toby1991.csi.s3-driver
       volumes:
         - name: socket-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/ch.ctrox.csi.s3-driver
+            path: /var/lib/kubelet/plugins/toby1991.csi.s3-driver
             type: DirectoryOrCreate

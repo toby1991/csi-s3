@@ -156,7 +156,7 @@ kubectl logs -l app=csi-s3 -c csi-s3
 This project can be built like any other go application.
 
 ```bash
-go get -u github.com/ctrox/csi-s3
+go get -u github.com/toby1991/csi-s3
 ```
 
 ### Build executable
@@ -172,3 +172,6 @@ Currently the driver is tested by the [CSI Sanity Tester](https://github.com/kub
 ```bash
 make test
 ```
+
+### Thanks
+https://github.com/ctrox/csi-s3/

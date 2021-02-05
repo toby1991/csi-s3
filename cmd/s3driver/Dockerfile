@@ -1,5 +1,5 @@
 FROM debian:stretch
-LABEL maintainers="Cyrill Troxler <cyrilltroxler@gmail.com>"
+LABEL maintainers="Toby Yan <me@tobyan.com>"
 LABEL description="csi-s3 slim image"
 
 # s3fs and some other dependencies
@@ -9,7 +9,7 @@ RUN apt-get update && \
   rm -rf /var/lib/apt/lists/*
 
 # install rclone
-ARG RCLONE_VERSION=v1.47.0
+ARG RCLONE_VERSION=v1.54.0
 RUN cd /tmp \
   && curl -O https://downloads.rclone.org/${RCLONE_VERSION}/rclone-${RCLONE_VERSION}-linux-amd64.zip \
   && unzip /tmp/rclone-${RCLONE_VERSION}-linux-amd64.zip \

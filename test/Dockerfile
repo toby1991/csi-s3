@@ -1,5 +1,5 @@
-FROM ctrox/csi-s3:dev-full
-LABEL maintainers="Cyrill Troxler <cyrilltroxler@gmail.com>"
+FROM toby1991/csi-s3:dev-full
+LABEL maintainers="Toby Yan <me@tobyan.com>"
 LABEL description="csi-s3 testing image"
 
 RUN apt-get update && \

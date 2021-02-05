@@ -21,7 +21,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ctrox/csi-s3/pkg/s3"
+	"github.com/toby1991/csi-s3/pkg/s3"
 )
 
 func init() {
