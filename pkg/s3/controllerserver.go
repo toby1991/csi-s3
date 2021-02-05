@@ -187,7 +187,58 @@ func (cs *controllerServer) ValidateVolumeCapabilities(ctx context.Context, req 
 }
 
 func (cs *controllerServer) ControllerExpandVolume(ctx context.Context, req *csi.ControllerExpandVolumeRequest) (*csi.ControllerExpandVolumeResponse, error) {
-	return &csi.ControllerExpandVolumeResponse{}, status.Error(codes.Unimplemented, "ControllerExpandVolume is not implemented")
+	volumeID := req.GetVolumeId()
+
+	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_EXPAND_VOLUME); err != nil {
+		glog.V(3).Infof("invalid expand volume req: %v", req)
+		return nil, err
+	}
+
+	// Check arguments
+	if len(volumeID) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "volumeID missing in request")
+	}
+
+	capacityBytes := req.GetCapacityRange().GetRequiredBytes()
+
+	glog.V(4).Infof("Got a request to expand volume %s", volumeID)
+
+	s3, err := newS3ClientFromSecrets(req.GetSecrets())
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize S3 client: %s", err)
+	}
+	exists, err := s3.bucketExists(volumeID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if bucket %s exists: %v", volumeID, err)
+	}
+	if !exists {
+		return nil, fmt.Errorf("failed to expand volume %s, bucket not exist", volumeID)
+	}
+
+	var b *bucket
+	b, err = s3.getBucket(volumeID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get bucket metadata of bucket %s: %v", volumeID, err)
+	}
+	// Check if volume expand capacity requested is bigger than the already existing capacity
+	if capacityBytes < b.CapacityBytes {
+		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Volume with the same name: %s but with bigger size already exist", volumeID))
+	}
+
+	// set expanded capacity
+	b.CapacityBytes = capacityBytes
+	if err := s3.setBucket(b); err != nil {
+		return nil, fmt.Errorf("Error setting bucket metadata: %v", err)
+	}
+
+	glog.V(4).Infof("expand volume %s to %d", volumeID, capacityBytes)
+	s3Vol := s3Volume{}
+	s3Vol.VolName = volumeID
+	s3Vol.VolID = volumeID
+	return &csi.ControllerExpandVolumeResponse{
+		CapacityBytes: capacityBytes, //TODO doesn't check if s3 disk really have the request capacity
+		NodeExpansionRequired: false, //TODO only change the meta file's capacity
+	}, nil
 }
 
 func sanitizeVolumeID(volumeID string) string {
